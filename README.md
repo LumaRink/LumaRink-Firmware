@@ -74,8 +74,8 @@ The back of the PCB is silk-screened to indicate each button’s function.
 ## Barebones PCB vs Full Assembled Kit
 
 ### Barebones PCB
-- Requires manual assembly: attach LEDs, buttons, or custom shell.  
-- Use the firmware files in `Firmware_Code/` to flash the board.  
+- Requires manual assembly: includes the PCB with all the electronics soldered onto it, requires a custom shell.  
+- Includes the firmware files in `Firmware_Code/` flashed to the board.  
 - Follow the WiFi connection process above.  
 - Once assembled and powered, usage is identical to the full kit.
 
