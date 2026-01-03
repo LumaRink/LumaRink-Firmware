@@ -1,4 +1,4 @@
-# LumaRink 5x5 LED Board Firmware
+# LumaRink 5x5 LED Matrices Board Firmware
 
 This repository contains the firmware and full documentation for the **LumaRink 5x5 LED boards**, including both barebones PCBs and full assembled kits.
 
