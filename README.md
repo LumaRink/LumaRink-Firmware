@@ -19,7 +19,7 @@ This repository contains the firmware and full documentation for the **LumaRink 
 
 ### Board Progression Examples
 
-![Bare PCB](docs/images/PCB.jpg)
+![Bare PCB](docs/images/pcb.jpg)
 ![Board Powered with HABS](docs/images/habs_example_1.jpg)
 ![Board Powered with SENS](docs/images/sens_example_1.jpg)
 ![Prototype SENS Assembled Board](docs/images/sens_example_2.jpg)
