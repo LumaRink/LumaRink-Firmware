@@ -7,31 +7,30 @@ import globals
 
 async def team_info(url, myTeam, myVersion):
     """
-    Fetch team information from the server and handle updates.
+    Fetch team information from the server.
 
     Args:
         url (str): Server endpoint URL.
-        myTeam (str): Identifier for the team.
-        myVersion (int): Current version of the software.
+        myTeam (str): Team name.
+        myVersion (int): Firmware version (informational only).
 
     Returns:
-        tuple: (game_state, team_score)
-               Defaults to ("OFF", 0) on errors.
+        tuple: (game_state, team_score), defaults to ("OFF", 0) on errors.
     """
     try:
         # -----------------------------
-        # Prepare payload for POST request
+        # Prepare payload
         # -----------------------------
         payload = {"message": myTeam, "version": myVersion}
 
         # -----------------------------
-        # Send request to backend
+        # Send POST request to server
         # -----------------------------
         response = urequests.post(url, json=payload)
-        print(f"Response status: {response.status_code}")
+        print(f"[team_info] Response status: {response.status_code}")
 
         if response.status_code != 200:
-            print("Error: Failed to fetch team info from server.")
+            print("[team_info] Error: Failed to fetch team info from server.")
             return "OFF", 0
 
         # -----------------------------
@@ -39,13 +38,13 @@ async def team_info(url, myTeam, myVersion):
         # -----------------------------
         try:
             data = response.json()
-            print(f"Fetched data: {data}")
+            print(f"[team_info] Fetched data: {data}")
         except ValueError:
-            print("Error: Failed to parse JSON response.")
+            print("[team_info] Error: Failed to parse JSON response.")
             return "OFF", 0
 
         if 'error' in data:
-            print(f"Error: {data['error']}")
+            print(f"[team_info] Server error: {data['error']}")
             return "OFF", 0
 
         # -----------------------------
@@ -55,49 +54,47 @@ async def team_info(url, myTeam, myVersion):
             team_name = data.get("team_name", "Unknown")
             globals.teamscore = data.get("score_game", 0)
             game_state = data.get("game_state", "OFF")
-            latestVersion = data.get("latestVersion", 1)
-            new_url = data.get("new_url", None)
+            latestVersion = data.get("latestVersion", myVersion)
+            firmware_server_url = data.get("firmware_server_url", url)
 
-            print(f"Team: {team_name}, Score: {globals.teamscore}, Game State: {game_state}")
+            print(f"[team_info] Team: {team_name}, Score: {globals.teamscore}, Game State: {game_state}")
 
             # -----------------------------
-            # Handle URL update
+            # Update server URL if changed
             # -----------------------------
-            if new_url and new_url != url:
-                print(f"Updating URL to {new_url}")
-                url = new_url
+            if firmware_server_url != url:
+                print(f"[team_info] Updating server URL to {firmware_server_url}")
+                url = firmware_server_url
                 settings = load_settings()
                 settings['url'] = url
                 save_settings(settings)
-                print("URL updated successfully!")
+                print("[team_info] URL updated successfully!")
 
             # -----------------------------
-            # Handle OTA / remote config update
+            # Version info update (no debounce/double-press)
             # -----------------------------
             if latestVersion != myVersion:
                 settings = load_settings()
                 settings['myVersion'] = latestVersion
-                if data.get("DOUBLE_PRESS_INTERVAL") is not None:
-                    settings['DOUBLE_PRESS_INTERVAL'] = data.get("DOUBLE_PRESS_INTERVAL")
-                if data.get("DEBOUNCE_MS") is not None:
-                    settings['DEBOUNCE_MS'] = data.get("DEBOUNCE_MS")
                 save_settings(settings)
-                machine.reset()
+                print(f"[team_info] Firmware version updated to {latestVersion}")
+                # Optional: trigger reset if needed
+                # machine.reset()
 
             # -----------------------------
             # Determine return based on game state
             # -----------------------------
-            if game_state in ["PRE", "LIVE", "CRIT"]:
+            if game_state in ["PRE", "LIVE", "CRIT", "FUT"]:
                 return game_state, globals.teamscore
             else:
                 return "OFF", 0
 
         else:
-            print("Error: Invalid data format from server.")
+            print("[team_info] Error: Invalid data format from server.")
             return "OFF", 0
 
     except Exception as e:
-        print(f"Error fetching team info: {e}")
+        print(f"[team_info] Exception fetching team info: {e}")
         return "OFF", 0
 
 
@@ -107,8 +104,8 @@ async def team_info_update(url, myTeam, myVersion):
 
     Args:
         url (str): Server endpoint URL.
-        myTeam (str): Identifier for the team.
-        myVersion (int): Current version of the software.
+        myTeam (str): Team name.
+        myVersion (int): Firmware version.
     """
     while True:
         gamestate, score = await team_info(url, myTeam, myVersion)
@@ -118,9 +115,9 @@ async def team_info_update(url, myTeam, myVersion):
         # -----------------------------
         if globals.first_nhl_scores <= 1:
             globals.first_nhl_scores += 1
-            print(globals.first_nhl_scores)
+            print(f"[team_info_update] First NHL fetch count: {globals.first_nhl_scores}")
 
-        print(f"Game state: {gamestate}, Score: {score}")
+        print(f"[team_info_update] Game state: {gamestate}, Score: {score}")
 
         # -----------------------------
         # Adjust polling interval based on game state

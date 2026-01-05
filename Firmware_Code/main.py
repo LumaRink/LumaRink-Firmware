@@ -38,7 +38,6 @@ myVersion = settings.get('myVersion', 1)
 
 # ---------------- Button config ----------------
 BUTTON_PINS = [7, 8, 9]  # 7=brightness/reset, 8=colour, 9=colour routine
-DEBOUNCE_MS = settings.get('DEBOUNCE_MS', 50)
 LONG_PRESS_MS = 5000
 
 buttons = [Pin(pin, Pin.IN, Pin.PULL_UP) for pin in BUTTON_PINS]
@@ -234,7 +233,7 @@ async def main():
     await wifi_connecting_routine(np, num_pixels, skate_pixels, iModeColours[0], brightness)
 
     # Setup WiFi
-    wm, success = await setup_wifi(ap_name="LumaRink", ap_password="LumaRink")
+    wm, success = await setup_wifi(ap_name="HockeySign", ap_password="HockeySign")
     if not success:
         print("Initial WiFi setup failed, portal should be running.")
 

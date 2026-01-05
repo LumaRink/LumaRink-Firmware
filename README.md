@@ -1,15 +1,28 @@
-# LumaRink 5x5 LED Board Firmware
+# LumaRink 5x5 LED Matrices Board Firmware
 
-This repository contains the firmware and full documentation for the **LumaRink 5x5 LED boards**, including both barebones PCBs and full assembled kits.
+![Final Assembled Board](docs/images/habs_example_2.jpg)
+
+This repository contains the firmware and full documentation for the **LumaRink 5x5 LED boards**, including both barebones PCBs and fully assembled kits.
 
 ---
 
 ## Overview
 
 - Displays names, hockey team logos, and patterns on a 5x5 LED matrix.
-- Connects to WiFi for live NHL score updates (unique goal routine).
+- Connects to WiFi for live NHL score updates using a **unique goal routine**.
 - Supports multiple colour modes, routines, and brightness control.
 - Open source firmware, fully documented for recovery or customization.
+- Fully compatible with the **FastAPI server** for live team scores.
+
+**Video Demo:**  
+[Watch a full demo of the board features on YouTube](https://www.youtube.com/watch?v=oLjh33H-Hdk)
+
+### Board Progression Examples
+
+![Bare PCB](docs/images/PCB.jpg)
+![Board Powered with HABS](docs/images/habs_example_1.jpg)
+![Board Powered with SENS](docs/images/sens_example_1.jpg)
+![Prototype SENS Assembled Board](docs/images/sens_example_2.jpg)
 
 ---
 
@@ -19,19 +32,19 @@ This repository contains the firmware and full documentation for the **LumaRink 
 - This may take a few seconds.  
 - If the connection is successful, the LEDs will flash **three times**, enabling NHL updates.  
 
+> **Power Note:** If you plan to run the LEDs at **maximum brightness**, make sure to use a **3A USB power supply**. Lower-rated supplies may cause flickering, resets, or damage to the board.
+
 ### Setting Up WiFi
 
 1. If the device is **not already connected** to WiFi, it will broadcast an access point named:  
-- SSID: LumaRink
-- Password: LumaRink
-
+   - SSID: `LumaRink`  
+   - Password: `LumaRink`
 2. Connect to this access point using a phone, tablet, or computer.  
 3. Open a web browser and navigate to:  
-- http://192.168.4.1
-
+   - http://192.168.4.1
 4. Follow the on-screen instructions to enter your local WiFi network’s **SSID and password**.  
 5. The board will attempt to connect to your local network automatically.  
-6. **If the device does not appear as an access point**, hold down the **Brightness / WiFi Reset button** for 5 seconds or longer to force the board into AP mode.
+6. **If the device does not appear as an access point**, hold down the **Brightness / WiFi Reset button** for 5+ seconds to force AP mode.
 
 ---
 
@@ -49,10 +62,10 @@ The back of the PCB is silk-screened to indicate each button’s function.
 
 ### Colour Modes
 - Single press the **Colours Button** to cycle modes:  
-- Team colours  
-- LGBTQ2+  
-- Trans  
-- Custom (if requested/configured)
+  - Team colours  
+  - LGBTQ2+  
+  - Trans  
+  - Custom (if requested/configured)
 
 ### Colour Routines
 - Pressing the **Colour Button** repeatedly cycles through routines:  
@@ -66,35 +79,36 @@ The back of the PCB is silk-screened to indicate each button’s function.
 
 ## NHL Updates
 
-- When connected to WiFi, the board runs a **unique goal routine** whenever the selected team scores.  
-- Ensure the board is within WiFi range for this feature.
+- When connected to WiFi, the board fetches live NHL data from the **FastAPI server**.  
+- Sends JSON payload with the team name and firmware version:
 
----
+```json
+{
+  "message": "<team_name>",
+  "version": <myVersion>
+}
+```
 
-## Barebones PCB vs Full Assembled Kit
+- Server returns JSON with current game state, score, and server URL:
 
-### Barebones PCB
-- Requires manual assembly: includes the PCB with all the electronics soldered onto it, requires a custom shell.  
-- Includes the firmware files in `Firmware_Code/` flashed to the board.  
-- Follow the WiFi connection process above.  
-- Once assembled and powered, usage is identical to the full kit.
+```json
+{
+  "team_name": "<team_name>",
+  "score_game": <score>,
+  "game_state": "<PRE|LIVE|CRIT|FUT|OFF>",
+  "firmware_server_url": "<current_server_url>",
+  "latestVersion": <latest_version>
+}
+```
 
-### Full Assembled Kit
-- Already assembled with 3D-printed shell and LEDs.  
-- Plug in USB power and follow WiFi setup if needed.  
-- Use buttons for brightness, colours, and routines as described above.
+**Polling intervals:**
 
----
+- **Board → Server:** Every 10 seconds while the game is active (`PRE`, `LIVE`, `CRIT`).  
+- **Server → NHL API:** Every 5 seconds, independently of any board requests.  
+  - This ensures the server always has up-to-date scores ready for any connected boards, accounting for the NHL API's own refresh timing.  
 
-## Flashing the Firmware
+**Notes:**
 
-- Use **Thonny** or **Arduino Labs for MicroPython** to copy `.py` and `.txt` files directly onto the ESP32.  
-- Ensure USB drivers for the ESP32 are installed.  
-- Refer to `Firmware_Code/` for all main files.
-- Refer to `docs/flashin.md` for instructions on how to flash the firmware.
-
----
-
-## License
-
-This firmware is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+- `myVersion` is used **only to detect server URL changes**.  
+- Teams not playing today may return `"error": "Team not found"`.  
+- For full details, refer to [Server.md](docs/Server.md).

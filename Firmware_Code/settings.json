@@ -1,1 +1,12 @@
-{"DOUBLE_PRESS_INTERVAL": 500, "DEBOUNCE_MS": 50, "colour": 0, "NUM_PIXELS": 42, "colour_routine": 3, "brightness": 0.125, "nhl_api": true, "url": "http://nhl-vps-9175.vpsmini.keepsec.cloud/nhl-data/", "MAX_COLOUR": 3, "myVersion": 1}
+{
+  "SKATE_PIXELS": 12,
+  "NUM_PIXELS": 112,
+  "WORD": "SENS",
+  "MYTEAM": "Senators",
+  "colour": 0,
+  "colour_routine": 1,
+  "brightness": 0.15,
+  "myVersion": 1,
+  "MAX_COLOUR": 3,
+  "url": "http://nhl-vps-9175.vpsmini.keepsec.cloud/nhl-data/"
+}
