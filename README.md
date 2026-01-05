@@ -111,4 +111,4 @@ The back of the PCB is silk-screened to indicate each button’s function.
 
 - `myVersion` is used **only to detect server URL changes**.  
 - Teams not playing today may return `"error": "Team not found"`.  
-- For full details, refer to [Server.md](docs/Server.md).
+- For full details, refer to [Server.md](docs/server.md).
